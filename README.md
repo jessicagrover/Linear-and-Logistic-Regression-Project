@@ -1,3 +1,4 @@
 # Project-STAT-632
-Description: A list of datasets for movies and TV shows released after covid in 2020 and 2021 on netflix and running some analysis and regression techniques on them we are going to predict if it is going to increase or decrease after covid lockdowns that is from 2022.
-Variables: show_id, type, title, country, release_year, rating, duration 
+Description: We have a dataset titanic.csv, which has variables like Passengers, Survived and other information of people on the Ship. The basic idea behind this project is to find out the survival rate of people during that incident based on their age, sex and class.
+Predictor variables: Age, Sex, Class
+Response Variable: Survival
