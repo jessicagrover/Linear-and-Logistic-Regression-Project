@@ -1,0 +1,173 @@
+---
+title: "ProjectSTAT632"
+author: "Abhishek Sendil"
+date: "4/24/2022"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+
+```
+
+
+```{r}
+titanic<-read_csv("titanic.csv")
+```
+
+```{r}
+titanic3<-titanic %>%
+  select(Survived,Pclass,Sex,Age)%>%
+  mutate(Survived=factor(Survived,levels=c(0,1),labels=c("no","yes")))%>%
+  mutate(Pclass=factor(Pclass))%>%
+  drop_na()
+
+
+```
+
+
+
+```{r}
+ggplot(titanic3,aes(x=Age,y=Survived,color=Sex))+
+geom_point(alpha=0.15)+
+geom_smooth(method="glm",method.args=list(family="binomial"),se=FALSE)+
+theme_bw()
+
+```
+
+
+
+
+
+
+
+# Summary Statitics : BoxPlot,ScatterPlot Bar Plot
+
+```{r}
+plot(Survived~Age,data=titanic3)
+
+```
+```{r}
+
+ggplot(titanic3,aes(x=Pclass,fill=Survived))+
+  geom_bar(posistion="fill") +
+xlab("Ticket Class") + ylab("Proportion")
+
+```
+
+
+```{r}
+ggplot(titanic3 ,aes(x=Sex,fill=Survived))+
+ geom_bar(position="fill")
+```
+
+
+
+
+```{r}
+glm2<-glm(Survived~Age+Sex+Pclass,family ="binomial",data=titanic3)
+summary(glm2)
+```
+
+
+
+
+
+
+# Cross Validation
+
+
+```{r}
+set.seed(243)
+n<-nrow(titanic3)
+train_index<-sample(1:n,round(0.7*n))
+titanic_train<-titanic3[train_index, ]
+titanic_test<-titanic3[-train_index, ]
+```
+
+
+
+Regression Summary on test model
+```{r}
+glm1<-glm(Survived~Age+Sex+Pclass,family ="binomial",data=titanic_test)
+summary(glm1)
+```
+
+Regression Summary on Train
+```{r}
+glm3<-glm(Survived~Age+Pclass+Sex,family="binomial",data=titanic_train)
+summary(glm3)
+```
+
+
+
+
+
+
+
+# Confusion Matrix 
+Accuracy Specificity Sensitivity
+
+
+```{r}
+prob<-predict(glm1,newdata = titanic_test,type="response")
+preds<-ifelse(prob>0.5,"yes","no")
+```
+
+
+
+
+
+
+```{r}
+cm<-table(predicted=preds,actual=titanic_test$Survived)
+addmargins(cm)
+```
+
+# Accuracy Percent correctly classified
+```{r}
+(100+78)/214
+```
+# Sensitivity Percent of people survived correctly classified (1)
+
+```{r}
+(78/98)
+```
+# Specificity Percent of people did not survived correctly classified (0)
+```{r}
+(100/116)
+```
+# Roc curve
+
+ 
+```{r}
+
+library(pROC)
+
+roc_obj<-roc(titanic_test$Survived,prob)
+plot(1-roc_obj$specificities,roc_obj$sensitivities,type="l",
+ xlab="1-Specificity",ylab="Sensitivity")
+
+points(x=100/116,y=78/98,col="red",pch=19)
+abline(0,1,lty=2)
+
+
+```
+ 
+ 
+```{r}
+auc(roc_obj)
+```
+ 
+ 
+# Predict 
+
+```{r}
+new_x<-data.frame(Age=25,Pclass='3',Sex='male')
+predict(glm1,newdata = new_x,type="response")
+```
+
+
